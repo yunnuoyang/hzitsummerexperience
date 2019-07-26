@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class className="com.hibernate.pojo.Goods2" tableName="goods">
+    <property name="id" columnName="id" ></property>
+    <property name="name" columnName="goods_name"></property>
+    <property name="price" columnName="goods_price"></property>
+</class>
