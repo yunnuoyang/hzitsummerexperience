@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class  lazy="false" name="com.hibernate.pojo.GoodsEntity" table="goods" schema="demo">
+        <id name="id">
+            <column name="id" sql-type="bigint(20)"/>
+            <generator class="native"/>
+        </id>
+        <property name="goodsName">
+            <column name="goods_name" sql-type="varchar(20)" length="20"/>
+        </property>
+        <property name="goodsPrice">
+            <column name="goods_price" sql-type="double" precision="-1"/>
+        </property>
+        <!--多的一方配置的属性与数据库的外键进行关系映射-->
+        <many-to-one name="people" column="pid" ></many-to-one>
+    </class>
+</hibernate-mapping>

@@ -7,6 +7,8 @@
     <class name="com.hibernate.pojo.People" table="people" schema="demo">
         <id name="id">
             <column name="id" sql-type="int(11)"/>
+            <!--表的生成策略采用本地数据库所设置的生成策略-->
+            <generator class="native"/>
         </id>
         <property name="name">
             <column name="name" sql-type="varchar(20)" length="20"/>
@@ -14,5 +16,11 @@
         <property name="year">
             <column name="year" sql-type="varchar(20)" length="20" not-null="true"/>
         </property>
+        <set name="goodsEntities" cascade="save-update" inverse="false">
+            <key>
+                <column name="pid"></column>
+            </key>
+             <one-to-many class="com.hibernate.pojo.GoodsEntity"/>
+        </set>
     </class>
 </hibernate-mapping>

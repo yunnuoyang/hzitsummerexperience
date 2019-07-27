@@ -9,6 +9,15 @@ public class GoodsEntity {
     private long id;
     private String goodsName;
     private double goodsPrice;
+    private People people;
+
+    public People getPeople() {
+        return people;
+    }
+
+    public void setPeople(People people) {
+        this.people = people;
+    }
 
     @Id
     @Column(name = "id")

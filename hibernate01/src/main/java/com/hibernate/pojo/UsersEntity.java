@@ -9,6 +9,15 @@ public class UsersEntity {
     private int id;
     private String username;
     private String password;
+    private GoodsEntity goodsEntity;
+
+    public GoodsEntity getGoodsEntity() {
+        return goodsEntity;
+    }
+
+    public void setGoodsEntity(GoodsEntity goodsEntity) {
+        this.goodsEntity = goodsEntity;
+    }
 
     @Id
     @Column(name = "id", nullable = false)
