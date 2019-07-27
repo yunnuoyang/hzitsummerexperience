@@ -13,6 +13,9 @@
         <!--<property name="format_sql">true</property>-->
         <mapping resource="com/hibernate/pojo/People.hbm.xml"></mapping>
         <mapping resource="com/hibernate/pojo/GoodsEntity.hbm.xml"></mapping>
+        <mapping resource="com/hibernate/pojo/Account.hbm.xml"></mapping>
+        <mapping resource="com/hibernate/pojo/Detail.hbm.xml"></mapping>
+
         <!-- DB schema will be updated if needed -->
     </session-factory>
 
