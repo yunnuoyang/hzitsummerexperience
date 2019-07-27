@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.hibernate.pojo.Project" table="project" schema="demo">
+        <id name="pno">
+            <column name="pno" sql-type="int(11)"/>
+            <generator class="increment"></generator>
+        </id>
+        <property name="pname">
+            <column name="pname" sql-type="varchar(30)" length="30" not-null="true"/>
+        </property>
+        <set name="employees" table="ep_relation" cascade="save-update" inverse="true">
+            <key>
+                <column name="pid"></column>
+            </key>
+            <many-to-many column="eid" not-found="ignore" class="com.hibernate.pojo.Employee"></many-to-many>
+        </set>
+    </class>
+</hibernate-mapping>

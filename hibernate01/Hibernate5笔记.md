@@ -69,6 +69,10 @@ lazy有三个属性：true、false、extra
 
 【extra】:一种比较聪明的懒加载策略，即调用集合的size/contains等方法的时候，hibernate并不会去加载整个集合的数据，而是发出一条聪明的SQL语句，以便获得需要的值，只有在真正需要用到这些集合元素对象数据的时候，才去发出查询语句加载所有对象的数据。
 
+#### inverse属性
+
+设inverse="true" 时，表示 Set/Collection 关系由另一方来维护，由不包含这个关系的一方来维护这个关系，所以才称为“反转”了，具体体现在sql语句不同，会增加一条update语句，是由对方提供的语句管理
+
 #### 关联关系的几种方式
 
 ##### 1.maney-to-one
@@ -148,3 +152,182 @@ hibernate一共打印了五条数据，先执行主表的插入，然后执行�
 
 注：以上均为单向维护。
 
+##### 3.OneToOne
+
+一对一的关系的映射有两种在数据库级别上边。
+
+1：从表的主键参考主表的主键，主表的主键既做主键又做外键
+
+```mysql
+create table user(
+      id int(11) NOT NULL AUTO_INCREMENT,
+   	 name varchar(20) DEFAULT NULL,
+     accpass varchar(20) DEFAULT NULL,
+    PRIMARY KEY (id)
+);
+create  table  reader (
+   `accid` int(11) NOT NULL,
+   `username` varchar(20) DEFAULT NULL,
+   `birthday` date DEFAULT NULL,
+   `email` varchar(50) DEFAULT NULL,
+   PRIMARY KEY (`accid`),
+   CONSTRAINT `detail_ibfk_1` FOREIGN KEY (`accid`) REFERENCES `account` (`id`)
+ )
+```
+
+
+
+2：从表的主键参考主表的外键，主表的外键是一个普通的键
+
+配置文件中主表与从表的配置文件都需要配置
+
+```chinese
+<one-to-one name="实体所对应的属性的名称" class="另一张关系表的classpath下的绝对路径"/>
+```
+
+例1：主表配置
+
+```
+ <generator class="native"></generator><!--采用数据库的本地的策略-->
+ <one-to-one name="detailByAccid" class="com.hibernate.pojo.Detail"/>
+```
+
+从表配置
+
+```java
+<id name="accid">
+            <column name="accid" sql-type="int(11)"/>
+            <generator class="foreign"><!--外键的配置，此处需要配置关联的属性-->
+                <param name="property">accountByAccid</param>
+            </generator>
+        </id>
+<one-to-one name="accountByAccid" class="com.hibernate.pojo.Account"/>
+```
+
+以上配置为第一种的一对一配置
+
+例二：主表不变
+
+从表配置
+
+```java
+   <class name="com.wdzl.pojo.Detail2" table="detail2" schema="hib">
+        <id name="detid">
+            <column name="detid" sql-type="int(10)"/>
+            <generator class="native"></generator>
+        </id><!--unique属性确定唯一性，在实体类中不用set集合，直接使用引用对象-->
+        <many-to-one name="account" cascade="all" unique="true" class="com.wdzl.pojo.Account">
+            <column name="accid" not-null="true"/><!--外键的列名-->
+        </many-to-one>
+    </class>
+```
+
+##### 4.Many-To-Many
+
+在配置many-to-many时，数据库表方面，采取三张表，两张实体表，一张关系表
+
+```mysql
+
+-- 创建员工表
+CREATE TABLE employee(
+	eno INT PRIMARY KEY AUTO_INCREMENT,
+	ename VARCHAR(30)
+);
+-- 创建项目表
+CREATE TABLE project(
+	pno INT PRIMARY KEY AUTO_INCREMENT,
+	pname VARCHAR(30)
+);
+-- 关系表
+CREATE TABLE `ep_relation` (
+   `pid` int(11) DEFAULT NULL,
+   `eid` int(11) DEFAULT NULL,
+    KEY `FK_ep_relation_e` (`eid`),
+    KEY `FK_ep_relation_p` (`pid`),
+   CONSTRAINT `FK_ep_relation_e` FOREIGN KEY (`eid`) REFERENCES `employee` (`eno`) ON DELETE           CASCADE ON UPDATE CASCADE,
+   CONSTRAINT `FK_ep_relation_p` FOREIGN KEY (`pid`) REFERENCES `project` (`pno`) ON DELETE           CASCADE ON UPDATE CASCADE
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+```
+
+而在实体类中我们只创建两个实体类，在类中使用面向对象的思想建立set集合来描述两者之间的关系
+
+如：
+
+```
+public class Project {
+    private int pno;
+    private String pname;
+    private Set<Employee> employees=new HashSet<>();
+}
+public class Employee {
+    private int eno;
+    private String ename;
+    private Set<Project> projects=new HashSet<>();
+}
+```
+
+在xml的定义中，我们均采用set集合进行many-to-many的标签进行关系的设置
+
+```java
+    <class name="com.hibernate.pojo.Project" table="project" schema="demo">
+        <id name="pno">
+            <column name="pno" sql-type="int(11)"/>
+            <generator class="increment"></generator>
+        </id>
+        <property name="pname">
+            <column name="pname" sql-type="varchar(30)" length="30" not-null="true"/>
+        </property>
+        <!--当此处的inverse="true"时，则关系由对方进行维护，我们在代码出保存由Project对象建立的关系时，可以从数据库中看到中间表中没有数据之间的关系映射，即缺少与代码中对应的数据之间的关联关系-->
+        <set name="employees" table="ep_relation" cascade="save-update" inverse="true">
+            <key><!-- 此处的pid为此类与关系表的外键的column值-->
+                <column name="pid"></column>
+            </key>
+            <!-- 此处的eid为对方在关系表中的外键的column值-->
+            <many-to-many column="eid" not-found="ignore" class="com.hibernate.pojo.Employee"></many-to-many>
+        </set>
+    </class>
+     <class name="com.hibernate.pojo.Employee" table="employee" schema="demo">
+        <id name="eno">
+            <column name="eno" sql-type="int(11)"/>
+            <generator class="increment"></generator>
+        </id>
+        <property name="ename">
+            <column name="ename" sql-type="varchar(30)" length="30" not-null="true"/>
+        </property>
+        <set name="projects" table="ep_relation">
+            <key>     <!-- 此处的eid为对方在关系表中的外键的column值-->
+                <column name="eid"></column>
+            </key>
+             <!-- 此处的eid为对方在关系表中的外键的column值-->
+            <many-to-many column="pid" class="com.hibernate.pojo.Project"></many-to-many>
+        </set>
+    </class>
+```
+
+保存的示例代码
+
+```java
+@Test
+    public void save(){
+        Session session = HibernateUtils.getSession();
+        Transaction transaction = session.beginTransaction();
+        Project project=new Project();
+        project.setPname("雨霏霏");
+        Employee emp=new Employee();
+        emp.setEname("赵小六");
+        Employee emp2=new Employee();
+        emp2.setEname("灵儿");
+        Set<Employee> employees = project.getEmployees();
+        employees.add(emp);
+        employees.add(emp2);
+        project.setEmployees(employees);
+      //保存Project对象的所建立起来的关联关系，及数据，在其inverse="true"时，则中间表的关系数据的插入由对方进行维护
+        session.save(project);
+        transaction.commit();
+        session.close();
+    }
+```
+
+#### 关于Hibernate的查询语句与mybatis的感受
+
+hibernate由于时全自动化的orm框架，所以在查询时为了避免字段的重复，默认给每一个字段提供了一个别名，页有效的避免了与数据库的关键字相同的查询错误。而mybatis由于是属于半自动化的框架，在提供灵活性的sql语句查询时，不可避免地会遇到hibernate相同的问题，提供的结果集映射的别名配置，框架更加灵活，相较于hibernate。orm框架所有的查询都是在查询的结果集上进行进一层的封装，因此，别名机制是非常有利于大量数据的查询的区分的。（ps:现在才感受到各级别软件的设计之美，赞）

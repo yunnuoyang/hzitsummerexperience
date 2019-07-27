@@ -5,6 +5,18 @@ import org.hibernate.Transaction;
 import org.junit.Test;
 
 import java.sql.Date;
+/**
+ * /**
+ *  * 主键关联配置：
+ *  *  1.主表对象的映射文件中增加<one-to-one></one-to-one>
+ *  *    主表主键生成策略，普通策略(自增native)
+ *  *  2.子表对象的映射文件中增加<one-to-one></one-to-one>
+ *  *      还需要配置主键生成策略
+ *  *      <generator class="foreign">
+ *  *                 <param name="property">account</param>
+ *  *       </generator>
+ *  */
+
 
 public class HibernateTestOne {
     @Test

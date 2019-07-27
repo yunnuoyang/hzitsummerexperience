@@ -79,6 +79,9 @@ public class HibernateTest {
         goodsEntity.setGoodsName("瓜子");
         goodsEntity.setGoodsPrice(33);
         goodsEntity.setPeople(people);
+        Set<GoodsEntity> entities = people.getGoodsEntities();
+        entities.add(goodsEntity);
+        people.setGoodsEntities(entities);
 //        session.save(people);
         session.save(goodsEntity);
         transaction.commit();
@@ -90,26 +93,26 @@ public class HibernateTest {
         SessionFactory sessionFactory = configuration.buildSessionFactory();
         Session session = sessionFactory.openSession();
         Transaction tran = session.beginTransaction();
-        People people = session.load(People.class, 14);
-        System.out.println("***************");
-        System.out.println("===="+people.getName());
-        for(GoodsEntity goodsEntity:people.getGoodsEntities()){
-            System.out.println(goodsEntity.getGoodsName());
-        }
-//        GoodsEntity goodsEntity=new GoodsEntity();
-//        goodsEntity.setGoodsName("电冰箱");
-//        goodsEntity.setGoodsPrice(2000);
-//        GoodsEntity goodsEntity1=new GoodsEntity();
-//        goodsEntity1.setGoodsName("电视机");
-//        goodsEntity1.setGoodsPrice(2000);
-//        People people=new People();
-//        people.setName("奉先");
-//        people.setYear(40l);
-//        Set<GoodsEntity> goodsEntities = people.getGoodsEntities();
-//        goodsEntities.add(goodsEntity);
-//        goodsEntities.add(goodsEntity1);
-//        people.setGoodsEntities(goodsEntities);
-//        session.save(people);
+//        People people = session.load(People.class, 14);
+//        System.out.println("***************");
+//        System.out.println("===="+people.getName());
+//        for(GoodsEntity goodsEntity:people.getGoodsEntities()){
+//            System.out.println(goodsEntity.getGoodsName());
+//        }
+        GoodsEntity goodsEntity=new GoodsEntity();
+        goodsEntity.setGoodsName("电冰箱");
+        goodsEntity.setGoodsPrice(2000);
+        GoodsEntity goodsEntity1=new GoodsEntity();
+        goodsEntity1.setGoodsName("电视机");
+        goodsEntity1.setGoodsPrice(2000);
+        People people=new People();
+        people.setName("奉先");
+        people.setYear(40l);
+        Set<GoodsEntity> goodsEntities = people.getGoodsEntities();
+        goodsEntities.add(goodsEntity);
+        goodsEntities.add(goodsEntity1);
+        people.setGoodsEntities(goodsEntities);
+        session.save(people);
         tran.commit();
         session.close();
     }

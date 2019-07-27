@@ -3,8 +3,6 @@ package com.hibernate.pojo;
 import javax.persistence.*;
 import java.util.Objects;
 
-@Entity
-@Table(name = "goods", schema = "demo", catalog = "")
 public class GoodsEntity {
     private long id;
     private String goodsName;
@@ -19,8 +17,7 @@ public class GoodsEntity {
         this.people = people;
     }
 
-    @Id
-    @Column(name = "id")
+
     public long getId() {
         return id;
     }
@@ -29,8 +26,6 @@ public class GoodsEntity {
         this.id = id;
     }
 
-    @Basic
-    @Column(name = "goods_name")
     public String getGoodsName() {
         return goodsName;
     }
@@ -39,8 +34,6 @@ public class GoodsEntity {
         this.goodsName = goodsName;
     }
 
-    @Basic
-    @Column(name = "goods_price")
     public double getGoodsPrice() {
         return goodsPrice;
     }

@@ -10,12 +10,12 @@
             <generator class="native"/>
         </id>
         <property name="goodsName">
-            <column name="goods_name" sql-type="varchar(20)" length="20"/>
+            <column name="goods_name"  sql-type="varchar(20)" length="20"/>
         </property>
         <property name="goodsPrice">
             <column name="goods_price" sql-type="double" precision="-1"/>
         </property>
         <!--多的一方配置的属性与数据库的外键进行关系映射-->
-        <many-to-one name="people" column="pid" ></many-to-one>
+        <many-to-one name="people"   column="pid" cascade="save-update"  ></many-to-one>
     </class>
 </hibernate-mapping>
