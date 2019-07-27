@@ -1,11 +1,9 @@
-package com.wdzl.hibernate.framework;
+package com.hibernate.framework;
 
-import com.hibernate.pojo.Goods;
 import com.hibernate.pojo.Goods2;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.junit.Test;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -26,6 +24,7 @@ public class Session {
     static Connection connection;
 
     static {
+        //静态代码块实例化时优先执行，且执行一次
         try {
             Class.forName(driver);
             connection = DriverManager.getConnection(url, userName, passWord);
@@ -34,7 +33,7 @@ public class Session {
         }
     }
 
-    private String resourcePath = "/goods.hbm.xml";
+    private String resourcePath = "goods.hbm.xml";
     private Map<String, String> map;
 
     public Session() {
@@ -133,7 +132,10 @@ public class Session {
     public void parseXML(String path) throws Exception {
         map = new HashMap<>();
         SAXReader saxReader = new SAXReader();
-        InputStream inputStream = getClass().getResourceAsStream(path);
+        //从当前的classpath根目录下加载指定的文件不加/
+//        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(path);
+        //从当前的包目录下加载指定的文件,如果path加"/"，则从根目录下加载文件
+        InputStream inputStream = this.getClass().getResourceAsStream(path);
         Document rootNode = saxReader.read(inputStream);
         Element rootElement = rootNode.getRootElement();
         //获取标签的属性的值
