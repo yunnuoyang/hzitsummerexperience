@@ -4,7 +4,7 @@
     "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
-    <class name="com.hibernate.pojo.Detail" table="detail" schema="demo">
+    <class  name="com.hibernate.pojo.Detail" table="detail" schema="demo">
         <id name="accid">
             <column name="accid" sql-type="int(11)"/>
             <generator class="foreign">
@@ -20,6 +20,6 @@
         <property name="email">
             <column name="email" sql-type="varchar(50)" length="50" not-null="true"/>
         </property>
-        <one-to-one name="accountByAccid" class="com.hibernate.pojo.Account"/>
+        <one-to-one  name="accountByAccid" foreign-key="accid" class="com.hibernate.pojo.Account"/>
     </class>
 </hibernate-mapping>

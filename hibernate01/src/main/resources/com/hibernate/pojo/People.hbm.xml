@@ -16,7 +16,7 @@
         <property name="year">
             <column name="year" sql-type="varchar(20)" length="20" not-null="true"/>
         </property>
-        <set name="goodsEntities" cascade="save-update" inverse="false">
+        <set name="goodsEntities" cascade="save-update" inverse="false" lazy="false">
             <key>
                 <column name="pid"></column>
             </key>

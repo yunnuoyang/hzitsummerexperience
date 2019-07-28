@@ -1,3 +1,5 @@
+package com.hibernate.test;
+
 import com.hibernate.pojo.GoodsEntity;
 import com.hibernate.pojo.People;
 import org.hibernate.Session;
