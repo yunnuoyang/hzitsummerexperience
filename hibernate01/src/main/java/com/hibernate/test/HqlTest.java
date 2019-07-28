@@ -142,9 +142,6 @@ public class HqlTest {
         session.save(detail);
         tran.commit();
         session.close();
-
-
-
     }
 
 }
