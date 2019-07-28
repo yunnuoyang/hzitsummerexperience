@@ -9,6 +9,7 @@ public class GoodsEntity {
     private double goodsPrice;
     private People people;
 
+
     public People getPeople() {
         return people;
     }

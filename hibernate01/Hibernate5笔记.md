@@ -427,6 +427,122 @@ public class Employee {
         List<Account> list = people.list();
         list.forEach((p)->System.out.println(p.getAccid()+p.getDetailByAccid().getUsername()));
     }
+/**
+     * 子查询 select * from a where a.id in(select id where a)
+     * 组查询group by having
+     * 连接查询 inner join ,left join ,right join
+     */
+    @Test
+    public void test9(){
+        Session session = HibernateUtils.getSession();
+        Query<Object[]> people = session.createQuery(
+                "select p.name,count(g.people.id) from People p left join GoodsEntity g " +
+                        "on g.people.id=p.id group by p.id,p.name having count(g.people.id)<3");
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        List<Object[]> list = people.list();
+        list.forEach((p)->System.out.println(p[0]+""+p[1]));
+    }
+```
+
+#### hibernate的QBC查询
+
+版本5.3
+
+```java
+
+    /**
+     * QBC之where查询
+     */
+    @Test
+    public void test1(){
+        Session session = HibernateUtils.getSession();
+        // 获得CriteriaBuilder 用来创建CriteriaQuery
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        // 创建CriteriaQuery 参数为返回结果类型
+        CriteriaQuery<Account> criteria = builder.createQuery(Account.class);
+        // 返会查询表 参数类型为要查询的持久类
+        Root<Account> root = criteria.from(Account.class);
+        // 设置where条件
+        criteria.where(builder.equal(root.get("accname"), "3424556"));
+        // 创建query 查询
+        Query<Account> query = session.createQuery(criteria);
+        // 返回结果
+        Account account = query.getSingleResult();
+        System.out.println(account.getAccname()+account.getAccpass());
+    }
+
+    /**
+     *查询总数目
+     */
+    @Test
+    public void test2(){
+        Session session = HibernateUtils.getSession();
+        // 获得CriteriaBuilder 用来创建CriteriaQuery
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        // 参数为查询的结果类型
+        CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+        // 从什么表查询
+        Root<Account> root = criteria.from(Account.class);
+        // 就是sql select 之后的语句
+        criteria.select(builder.count(root));
+        // 使用query 实现查询
+        Query<Long> query = session.createQuery(criteria);
+        // 结果集
+        Long result = query.uniqueResult();
+        System.out.println(result);
+    }
+```
+
+#### hibernate的XML中的sql语句
+
+类似与mybatis的配置
+
+```java
+ <sql-query name="allDetails">
+        <return class="com.hibernate.pojo.Detail" alias="detail"></return>
+        select * from detail
+    </sql-query>
+    <query name="allDetails2" >
+        from Detail
+    </query>
+```
+
+执行代码
+
+```java
+ /**
+     * XML中的sql-query
+     */
+    @Test
+    public void test1(){
+        Session session = HibernateUtils.getSession();
+        Query<Detail> query = session.createNamedQuery("allDetails", Detail.class);
+        query.list()
+                .forEach((d)->{
+                    System.out.println(d.getUsername()+d.getBirthday());
+                });
+    }
+    /**
+     * XML中的query
+     */
+    @Test
+    public void test2(){
+        Session session = HibernateUtils.getSession();
+        Query<Detail> query = session.createNamedQuery("allDetails2", Detail.class);
+        query.list()
+                .forEach((d)->{
+                    System.out.println(d.getUsername()+d.getBirthday());
+                });
+    }
+```
+
+hibernate的属性配置
+
+```java
+<!--设置update与insert属性可以在程序修改属性值时受到约束，不会修改相应的配置的属性所对应的列名的值--> 
+<property name="birthday" update="false" insert="false">
+            <column name="birthday"  sql-type="date" not-null="true"/>
+ </property>
 ```
 
 

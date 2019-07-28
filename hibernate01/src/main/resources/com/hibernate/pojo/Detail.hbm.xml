@@ -14,12 +14,19 @@
         <property name="username">
             <column name="username" sql-type="varchar(20)" length="20" not-null="true"/>
         </property>
-        <property name="birthday">
-            <column name="birthday" sql-type="date" not-null="true"/>
+        <property name="birthday" update="false" insert="false">
+            <column name="birthday"  sql-type="date" not-null="true"/>
         </property>
         <property name="email">
             <column name="email" sql-type="varchar(50)" length="50" not-null="true"/>
         </property>
         <one-to-one  name="accountByAccid" foreign-key="accid" class="com.hibernate.pojo.Account"/>
     </class>
+    <sql-query name="allDetails">
+        <return class="com.hibernate.pojo.Detail" alias="detail"></return>
+        select * from detail
+    </sql-query>
+    <query name="allDetails2" >
+        from Detail
+    </query>
 </hibernate-mapping>

@@ -10,6 +10,7 @@ public class People {
     private int id;
     private String name;
     private long year;
+
     private Set<GoodsEntity> goodsEntities=new HashSet<>();
 
     public Set<GoodsEntity> getGoodsEntities() {

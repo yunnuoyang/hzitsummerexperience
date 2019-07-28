@@ -1,9 +1,11 @@
 package com.hibernate.test;
 
 import com.hibernate.pojo.Account;
+import com.hibernate.pojo.Detail;
 import com.hibernate.pojo.People;
 import com.hibernate.pojo.Project;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.hibernate.query.QueryProducer;
@@ -12,8 +14,10 @@ import org.hibernate.query.criteria.internal.predicate.IsEmptyPredicate;
 import org.junit.Test;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
+import java.sql.Date;
 import java.util.List;
 
 public class HqlTest {
@@ -114,14 +118,33 @@ public class HqlTest {
         list.forEach((p)->System.out.println(p.getAccid()+p.getDetailByAccid().getUsername()));
     }
     /**
-     * 动态Sql:
+     * 子查询 select * from a where a.id in(select id where a)
+     * 组查询group by having
+     * 连接查询 inner join ,left join ,right join
      */
     @Test
     public void test9(){
         Session session = HibernateUtils.getSession();
-        Query<Account> people = session.createQuery("from Account");
+        Query<Object[]> people = session.createQuery(
+                "select p.name,count(g.people.id) from People p left join GoodsEntity g " +
+                        "on g.people.id=p.id group by p.id,p.name having count(g.people.id)<3");
         CriteriaBuilder builder = session.getCriteriaBuilder();
-        List<Account> list = people.list();
-        list.forEach((p)->System.out.println(p.getAccid()+p.getDetailByAccid().getUsername()));
+        List<Object[]> list = people.list();
+        list.forEach((p)->System.out.println(p[0]+""+p[1]));
     }
+    @Test
+    public void test10(){
+        Session session = HibernateUtils.getSession();
+        Transaction tran = session.beginTransaction();
+        Detail detail = session.get(Detail.class, 3);
+        detail.setBirthday(new Date(System.currentTimeMillis()));
+        detail.setEmail("aaaaaaaaaa");
+        session.save(detail);
+        tran.commit();
+        session.close();
+
+
+
+    }
+
 }
