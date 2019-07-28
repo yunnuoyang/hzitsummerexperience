@@ -4,7 +4,7 @@
     "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
-    <class name="com.hibernate.pojo.People" table="people" schema="demo">
+    <class  name="com.hibernate.pojo.People" table="people" schema="demo">
         <id name="id">
             <column name="id" sql-type="int(11)"/>
             <!--表的生成策略采用本地数据库所设置的生成策略-->
@@ -16,11 +16,12 @@
         <property name="year">
             <column name="year" sql-type="varchar(20)" length="20" not-null="true"/>
         </property>
-        <set name="goodsEntities" cascade="save-update" inverse="false" lazy="false">
+        <!--batch-size	(可选, 默认为1) 指定通过延迟加载取得集合实例的批处理块大小（"batch size"）。 -->
+        <set  name="goodsEntities" batch-size="3"     cascade="save-update" >
             <key>
                 <column name="pid"></column>
             </key>
-             <one-to-many class="com.hibernate.pojo.GoodsEntity"/>
+             <one-to-many  class="com.hibernate.pojo.GoodsEntity"/>
         </set>
     </class>
 </hibernate-mapping>

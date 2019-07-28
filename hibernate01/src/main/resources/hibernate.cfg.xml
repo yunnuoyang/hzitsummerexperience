@@ -10,7 +10,7 @@
         <property name="connection.password">root</property>
         <property name="hibernate.show_sql">true</property>
         <!--<property name="hbm2ddl.auto">update</property>-->
-        <!--<property name="format_sql">true</property>-->
+        <property name="format_sql">true</property>
         <mapping resource="com/hibernate/pojo/People.hbm.xml"></mapping>
         <mapping resource="com/hibernate/pojo/GoodsEntity.hbm.xml"></mapping>
         <mapping resource="com/hibernate/pojo/Account.hbm.xml"></mapping>

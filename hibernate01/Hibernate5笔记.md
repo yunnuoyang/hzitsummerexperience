@@ -1,3 +1,5 @@
+
+
 ### Hibernate5笔记
 
 #### hibernate的三态
@@ -545,10 +547,337 @@ hibernate的属性配置
  </property>
 ```
 
+##### fetch
 
+当fetch=join 时，发送左连接查询，查询一的一方的单条数据会产生左连接查询可能会有迪卡尔积的问题，适合数据量小的查询，直接在主表进行配置
+
+```java
+       <set  name="goodsEntities" fetch="join"  lazy="false"  cascade="save-update" >
+            <key>
+                <column name="pid"></column>
+            </key>
+             <one-to-many  class="com.hibernate.pojo.GoodsEntity"/>
+        </set>
+```
+
+代码：只有在查询单个主表的对象才会显示出差异,如果查询主对象的集合数据则此配置无效
+
+```java
+ @Test
+    public void test2(){
+        Session session = HibernateUtils.getSession();
+        People people = session.get(People.class, 38);
+        System.out.println(people.getName()+""+people.getGoodsEntities().size());
+    }
+```
+
+console:
+
+```mysql
+Hibernate: 
+    select
+        people0_.id as id1_4_0_,
+        people0_.name as name2_4_0_,
+        people0_.year as year3_4_0_,
+        goodsentit1_.pid as pid4_3_1_,
+        goodsentit1_.id as id1_3_1_,
+        goodsentit1_.id as id1_3_2_,
+        goodsentit1_.goods_name as goods_na2_3_2_,
+        goodsentit1_.goods_price as goods_pr3_3_2_,
+        goodsentit1_.pid as pid4_3_2_ 
+    from
+        people people0_ 
+    left outer join
+        goods goodsentit1_ 
+            on people0_.id=goodsentit1_.pid 
+    where
+        people0_.id=?
+小王2
+```
+
+当fetch=select时，发送两条查询语句，可能会产生n+1问题，数据量大的情况下采用此种查询,发送多条sql,单记录与多记录的主表查询效果一样。
+
+如：单记录查询（区别join的单表）
+
+```java
+  <set  name="goodsEntities" fetch="select"  lazy="false"  cascade="save-update" >
+            <key>
+                <column name="pid"></column>
+            </key>
+             <one-to-many  class="com.hibernate.pojo.GoodsEntity"/>
+        </set>
+    @Test
+    public void test2(){
+        Session session = HibernateUtils.getSession();
+        People people = session.get(People.class, 38);
+        System.out.println(people.getName()+""+people.getGoodsEntities().size());
+    }
+```
+
+console:
+
+```mysql
+Hibernate: 
+    select
+        people0_.id as id1_4_0_,
+        people0_.name as name2_4_0_,
+        people0_.year as year3_4_0_ 
+    from
+        people people0_ 
+    where
+        people0_.id=?
+Hibernate: 
+    select
+        goodsentit0_.pid as pid4_3_0_,
+        goodsentit0_.id as id1_3_0_,
+        goodsentit0_.id as id1_3_1_,
+        goodsentit0_.goods_name as goods_na2_3_1_,
+        goodsentit0_.goods_price as goods_pr3_3_1_,
+        goodsentit0_.pid as pid4_3_1_ 
+    from
+        goods goodsentit0_ 
+    where
+        goodsentit0_.pid=?
+小王2
+```
+
+当fetch=subselect时，当fetch=subselect 时,发送两条语句，一条为子查询对一的一方的多条记录查询有效
+
+```java
+   <set  name="goodsEntities" fetch="subselect"  lazy="false"  cascade="save-update" >
+            <key>
+                <column name="pid"></column>
+            </key>
+             <one-to-many  class="com.hibernate.pojo.GoodsEntity"/>
+   </set>
+ @Test
+    public void test1(){
+        Session session = HibernateUtils.getSession();
+        Query<People> query = session.createQuery(" from People ", People.class);
+        List<People> list = query.list();
+        list.forEach(people -> System.out.println(people.getName()+"=="+people.getGoodsEntities().size()));
+    }
+```
+
+console:
+
+```mysql
+Hibernate: 
+    select
+        people0_.id as id1_4_,
+        people0_.name as name2_4_,
+        people0_.year as year3_4_ 
+    from
+        people people0_
+Hibernate: 
+    select
+        goodsentit0_.pid as pid4_3_1_,
+        goodsentit0_.id as id1_3_1_,
+        goodsentit0_.id as id1_3_0_,
+        goodsentit0_.goods_name as goods_na2_3_0_,
+        goodsentit0_.goods_price as goods_pr3_3_0_,
+        goodsentit0_.pid as pid4_3_0_ 
+    from
+        goods goodsentit0_ 
+    where
+        goodsentit0_.pid in (
+            select
+                people0_.id 
+            from
+                people people0_
+        )
+```
+
+##### batch-size
+
+(可选, 默认为1) 指定通过延迟加载取得集合实例的批处理块大小（"batch size"）。注：lazy属性默认设置true
+
+```java
+<!--batch-size  (可选, 默认为1) 指定通过延迟加载取得集合实例的批处理块大小（"batch size"）。 -->
+<set  name="goodsEntities" batch-size="2"   lazy="false"  cascade="save-update" >
+    <key>
+        <column name="pid"></column>
+    </key>
+     <one-to-many  class="com.hibernate.pojo.GoodsEntity"/>
+</set>
+```
+
+sql体现:数据库的数据主表四条不同的数据，将四条数据分为两批数据进行处理，sql改变，提高查询效率
+
+```mysql
+Hibernate: 
+    select
+        people0_.id as id1_4_,
+        people0_.name as name2_4_,
+        people0_.year as year3_4_ 
+    from
+        people people0_
+Hibernate: 
+    select
+        goodsentit0_.pid as pid4_3_1_,
+        goodsentit0_.id as id1_3_1_,
+        goodsentit0_.id as id1_3_0_,
+        goodsentit0_.goods_name as goods_na2_3_0_,
+        goodsentit0_.goods_price as goods_pr3_3_0_,
+        goodsentit0_.pid as pid4_3_0_ 
+    from
+        goods goodsentit0_ 
+    where
+        goodsentit0_.pid in (
+            ?, ?
+        )
+小王==2
+张三==2
+Hibernate: 
+    select
+        goodsentit0_.pid as pid4_3_1_,
+        goodsentit0_.id as id1_3_1_,
+        goodsentit0_.id as id1_3_0_,
+        goodsentit0_.goods_name as goods_na2_3_0_,
+        goodsentit0_.goods_price as goods_pr3_3_0_,
+        goodsentit0_.pid as pid4_3_0_ 
+    from
+        goods goodsentit0_ 
+    where
+        goodsentit0_.pid in (
+            ?, ?
+        )
+李四==2
+w5==1
+```
+
+设置为3时
+
+```mysql
+Hibernate: 
+    select
+        people0_.id as id1_4_,
+        people0_.name as name2_4_,
+        people0_.year as year3_4_ 
+    from
+        people people0_
+Hibernate: 
+    select
+        goodsentit0_.pid as pid4_3_1_,
+        goodsentit0_.id as id1_3_1_,
+        goodsentit0_.id as id1_3_0_,
+        goodsentit0_.goods_name as goods_na2_3_0_,
+        goodsentit0_.goods_price as goods_pr3_3_0_,
+        goodsentit0_.pid as pid4_3_0_ 
+    from
+        goods goodsentit0_ 
+    where
+        goodsentit0_.pid in (
+            ?, ?, ?
+        )
+小王==2
+张三==2
+李四==2
+Hibernate: 
+    select
+        goodsentit0_.pid as pid4_3_1_,
+        goodsentit0_.id as id1_3_1_,
+        goodsentit0_.id as id1_3_0_,
+        goodsentit0_.goods_name as goods_na2_3_0_,
+        goodsentit0_.goods_price as goods_pr3_3_0_,
+        goodsentit0_.pid as pid4_3_0_ 
+    from
+        goods goodsentit0_ 
+    where
+        goodsentit0_.pid=?
+w5==1
+```
+
+参考资料
+
+```java
+many to many
+序号	属性	说明
+1	name	属性名
+2	column	(可选): 外间字段名。它也可以通过嵌套的元素指定。
+3	class	(可选 - 默认是通过反射得到属性类型): 关联的类的名字。
+4	cascade	（级联） (可选): 指明哪些操作会从父对象级联到关联的对象。
+5	fetch	(可选 - 默认为  select ): 在外连接抓取（outer-join fetching）和序列选择抓取（sequential select fetching）两者中选择其一。
+6	update, insert	(可选 - defaults to  true ) 指定对应的字段是否包含在用于UPDATE   和/或  INSERT   的SQL语句中。如果二者都是false ,则这是一个纯粹的 “外源性（derived）”关联，它的值是通过映射到同一个（或多个）字段的某些其他属性得到 或者通过trigger(触发器）、或其他程序。
+7	property-ref	(可选) 指定关联类的一个属性，这个属性将会和本外键相对应。 如果没有指定，会使用对方关联类的主键。
+8	access	(可选 - 默认是  property ): Hibernate用来访问属性的策略。
+9	unique	(可选): 使用DDL为外键字段生成一个唯一约束。此外， 这也可以用作property-ref 的目标属性。这使关联同时具有 一对一的效果。
+10	not-null	(可选): 使用DDL为外键字段生成一个非空约束。
+11	optimistic-lock	(可选 - 默认为  true ): 指定这个属性在做更新时是否需要获得乐观锁定（optimistic lock）。 换句话说，它决定这个属性发生脏数据时版本（version）的值是否增长。
+12	lazy	(可选 - 默认为  proxy ): 默认情况下，单点关联是经过代理的。lazy="true" 指定此属性应该在实例变量第一次被访问时应该延迟抓取（fetche lazily）（需要运行时字节码的增强）。lazy="false" 指定此关联总是被预先抓取。
+13	not-found	(可选 - 默认为  exception ): 指定外键引用的数据不存在时如何处理：  ignore 会将数据不存在作为关联到一个空对象（null）处理。
+14	entity-name	(optional): 被关联的类的实体名。
+```
+
+```
+set节点有以下属性（摘自Hibernate文档）：
+序号	属性	说明
+1	name	集合属性的名称
+2	table	(可选，默认为属性的名称)这个集合表的名称(不能在一对多的关联关系中使用)
+3	schema	(可选) 表的schema的名称, 他将覆盖在根元素中定义的schema
+4	lazy	(可选，默认为false) lazy(可选--默认为false) 允许延迟加载（lazy initialization ）(不能在数组中使用)
+5	inverse	(可选，默认为false) 标记这个集合作为双向关联关系中的方向一端。
+6	cascade	(可选，默认为none) 让操作级联到子实体all: 所有情况下均进行关联操作，即save-update和delete。 none: 所有情况下均不进行关联操作。这是默认值。  save-update: 在执行save/update/saveOrUpdate时进行关联操作。  delete: 在执行delete 时进行关联操作。
+7	sort	(可选)指定集合的排序顺序, 其可以为自然的(natural)或者给定一个用来比较的类。
+8	order-by	(可选, 仅用于jdk1.4) 指定表的字段(一个或几个)再加上asc或者desc(可选), 定义Map,Set和Bag的迭代顺序 
+9	where	(可选) 指定任意的SQL where条件, 该条件将在重新载入或者删除这个集合时使用(当集合中的数据仅仅是所有可用数据的一个子集时这个条件非常有用) 
+10	outer-join	(可选)指定这个集合,只要可能,应该通过外连接(outer join)取得。在每一个SQL语句中, 只能有一个集合可以被通过外连接抓取(译者注: 这里提到的SQL语句是取得集合所属类的数据的Select语句) 
+11	batch-size	(可选, 默认为1) 指定通过延迟加载取得集合实例的批处理块大小（"batch size"）。 
+12	access	(可选-默认为属性property):Hibernate取得属性值时使用的策略
+```
+
+#### Session一级缓存测试
+
+```java
+ public static void main(String[] args) {
+        test3();
+
+    }
+
+    public  static  void  test3(){
+        Session session = HibernateUtils.getSession();
+        People people = session.get(People.class,3);
+        Transaction tran = session.beginTransaction();
+        people.setName("QQQQQXQ");
+        session.flush();//默认会提交事务，将持久态的对象持久化到数据库中
+//        tran.commit();
+        session.close();
+    }
+    public  static  void  test2(){
+        Session session = HibernateUtils.getSession();
+        System.out.println(session.hashCode());
+        People people = new People();
+        people.setId(3);
+        System.out.println(">>>>>---1--"+student1.getSname());
+        session.refresh(student1);//和数据库端同步
+        System.out.println(">>>>>---2--"+student1.getSname());
+
+        session.close();
+    }
+    /**
+     * 一级缓存 Session级别的缓存
+     * 验证方式：是否发起SQL查询
+     */
+    public  static  void  test1(){
+        Session session = HibernateUtils.getSession();
+        System.out.println(session.hashCode());
+        People people = session.get(People.class,3);
+        System.out.println("********************");
+        //从session缓存中移除对象
+        //session.evict(student1);
+        //清空缓存
+        session.clear();
+
+        People people2 = session.get(People.class,3);
+        System.out.println(people.hashCode()+"==="+people2.hashCode());
+        session.close();
+    }
+```
 
 
 
 #### 关于Hibernate的查询语句与mybatis的感受
 
 hibernate由于时全自动化的orm框架，所以在查询时为了避免字段的重复，默认给每一个字段提供了一个别名，页有效的避免了与数据库的关键字相同的查询错误。而mybatis由于是属于半自动化的框架，在提供灵活性的sql语句查询时，不可避免地会遇到hibernate相同的问题，提供的结果集映射的别名配置，框架更加灵活，相较于hibernate。orm框架所有的查询都是在查询的结果集上进行进一层的封装，因此，别名机制是非常有利于大量数据的查询的区分的。（ps:现在才感受到各级别软件的设计之美，赞）
+
+文章代码地址已上传gitub:https://github.com/yunnuoyang/hzitsummerexperience.git其中的hibernate01的module中有部分测试代码
