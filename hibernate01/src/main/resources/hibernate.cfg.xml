@@ -11,13 +11,20 @@
         <property name="hibernate.show_sql">true</property>
         <!--<property name="hbm2ddl.auto">update</property>-->
         <property name="format_sql">true</property>
+        <!--二级缓存-->
+        <!-- 开启查询缓存 -->
+        <property name="hibernate.cache.use_query_cache">true</property>
+        <!--<property name="cache.use_second_level_cache">true</property>-->
+        <property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.internal.SingletonEhcacheRegionFactory</property>
+        <property name="cache.use_query_cache">true</property>
         <mapping resource="com/hibernate/pojo/People.hbm.xml"></mapping>
         <mapping resource="com/hibernate/pojo/GoodsEntity.hbm.xml"></mapping>
         <mapping resource="com/hibernate/pojo/Account.hbm.xml"></mapping>
         <mapping resource="com/hibernate/pojo/Detail.hbm.xml"></mapping>
         <mapping resource="com/hibernate/pojo/Employee.hbm.xml"></mapping>
         <mapping resource="com/hibernate/pojo/Project.hbm.xml"></mapping>
-
+        <mapping class="com.hibernate.pojo.Fish"></mapping>
+        <class-cache usage="read-write" class="com.hibernate.pojo.Detail"/>
         <!-- DB schema will be updated if needed -->
     </session-factory>
 

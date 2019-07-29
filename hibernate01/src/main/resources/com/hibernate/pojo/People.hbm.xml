@@ -5,6 +5,7 @@
 <hibernate-mapping>
 
     <class  name="com.hibernate.pojo.People" table="people" schema="demo">
+        <cache usage="read-only"></cache>
         <id name="id">
             <column name="id" sql-type="int(11)"/>
             <!--表的生成策略采用本地数据库所设置的生成策略-->

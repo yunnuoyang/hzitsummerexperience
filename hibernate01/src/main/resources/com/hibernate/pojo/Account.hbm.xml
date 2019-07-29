@@ -5,6 +5,7 @@
 <hibernate-mapping>
 
     <class name="com.hibernate.pojo.Account"  table="account" schema="demo">
+        <cache usage="read-only"></cache>
         <id name="accid">
             <column name="accid" sql-type="int(11)"/>
             <generator class="native"></generator>
