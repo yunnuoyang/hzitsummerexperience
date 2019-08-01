@@ -1,8 +1,6 @@
 package com.a.lamda;
 
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.ArrayList;
