@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapper.IEmpMapper">
+    <resultMap id="baseMap" type="com.mybatis.pojo.Emp">
+        <id property="id" column="id"></id>
+        <result column="name" property="name"></result>
+        <result column="sex" property="sex"  typeHandler="com.mybatis.handler.MyHandler"></result>
+    </resultMap>
+    <select id="getEmp" resultMap="baseMap">
+        select * from emp
+    </select>
+    <parameterMap id="MyParamHandler" type="com.mybatis.pojo.Emp" >
+        <parameter property="id" ></parameter>
+        <parameter property="name" ></parameter>
+        <parameter property="sex" typeHandler="com.mybatis.handler.MyHandler"></parameter>
+    </parameterMap>
+    <insert id="addEmp" parameterMap="MyParamHandler">
+        insert into emp(id,name,sex)  values(#{id},#{name},#{sex,typeHandler=com.mybatis.handler.MyHandler})
+    </insert>
+
+</mapper>

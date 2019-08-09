@@ -1,8 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!DOCTYPE struts PUBLIC
-        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
-        "http://struts.apache.org/dtds/struts-2.0.dtd">
-
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
 <struts>
+    <!--设置struts的默认url后缀-->
+    <constant name="struts.action.extension" value="do"/>
+    <!--继承struts的默认空间的所有功能extends="struts-default"-->
+    <package name="c" extends="struts-default">
+        <!--name="reg"页面的action,即提交的url的请求的名，url的后缀默认是action,配置后是do->
+        <!- reg的的action有class配置的类来进行管理-->
+        <!--第一种方式有struct创建管理action-->
+        <!--<action name="reg" method="register" class="com.struts.controller.UserController">-->
+           <!--&lt;!&ndash;成功跳转页&ndash;&gt;-->
+            <!--<result name="success" type="redirect">index.jsp</result>-->
+        <!--</action>-->
+        <!--第二种spring整合,将action交给spring容器进行管理-->
+        <!--<action name="reg" method="register" class="userController">-->
+           <!--&lt;!&ndash;成功跳转页&ndash;&gt;-->
+            <!--<result name="success" type="redirect">index.jsp</result>-->
+        <!--</action>-->
+        <action name="upload" method="fileUpLoad" class="com.struts.controller.UserController">
+            <result name="success">index.jsp</result>
+        </action>
+    <!--<interceptors>-->
+        <!--<interceptor-ref name="fileUpload">&lt;!&ndash; 添加 文件上传 拦截器 设置 ，并添加参数 &ndash;&gt;-->
+            <!--<param name="maximumSize">200000</param>&lt;!&ndash; 单个文件大小 &ndash;&gt;-->
+            <!--<param name="allowedExtensions">html,txt</param>&lt;!&ndash; 允许上传的文件扩展名 &ndash;&gt;-->
+        <!--</interceptor-ref>-->
+    <!--</interceptors>-->
+
+
+    </package>
+
+    <!-- 将action托管给spring -->
+    <!--<constant name="struts.objectFactory" value="spring" />-->
 </struts>

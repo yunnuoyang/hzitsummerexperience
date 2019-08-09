@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapper.IStudentMapper">
+<cache readOnly="true" eviction="FIFO"></cache>
+    <select id="querryQritirea" resultType="student">
+        SELECT * FROM STUDENT
+        <where>
+            <if test="sno!=null">
+                and sno=#{sno}
+            </if>
+            <if test="sname!=null">
+                 and  sname  like #{sname}
+            </if>
+        </where>
+    </select>
+
+
+
+
+    <resultMap id="assosiationMap" type="student" autoMapping="true">
+        <association property="school" javaType="school" autoMapping="true"></association>
+    </resultMap>
+
+    <resultMap id="assosiationMap2" type="student" autoMapping="true" >
+        <!--fetchType="lazy"懒加载 eager立即加载 如果配置了全局的懒加载，此处设置eader
+        则会采用就近原则，采用立即加载的策略-->
+        <association property="school" javaType="School" column="scid" fetchType="lazy"  select="com.mybatis.mapper.ISchoolMapper.getSchool" >
+        </association>
+    </resultMap>
+
+    <!--使用关联查询用缓存做-->
+    <!--useCache="true"配置缓存
+    flushCache="true"刷新缓存，缓存失效
+    -->
+<select id="getLink" resultMap="assosiationMap2"  >
+    select * from student
+</select>
+    <select id="getStudent" resultType="student" >
+        select * from student where scid=#{scid}
+    </select>
+
+    <select id="getAssosiation" resultMap="assosiationMap">
+        select sno,sname,student.scid ,scname from school,student where school.scid=student.scid
+    </select>
+
+
+    <select id="count" resultType="Integer">
+        select count(*) from student
+    </select>
+    <select id="count$" resultType="Integer">
+        select count(*) from student where sno=${sno}
+    </select>
+    <!--#和$的区别
+    $1.用于sql拼接 2.提供map或object,根据键或者属性名获取值
+    #1.预处理的占位符方式生成sql, 2参数名没有限制
+    -->
+    <select id="count2" resultType="Integer" parameterType="int">
+        select count(*) from student  where sno=#{sno}
+    </select>
+    <select id="selectObj" resultType="Object" >
+        select * from student
+    </select>
+    <insert id="insert" >
+        insert into  student(sno,sname,scid) values (#{sno},#{sname},#{scid})
+    </insert>
+    <update id="fix" >
+        update student set sname=#{sname} where sno=#{sno}
+    </update>
+</mapper>
+    
